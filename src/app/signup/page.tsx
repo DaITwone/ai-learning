@@ -1,30 +1,52 @@
+// src/app/signup/page.tsx
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-// import { FaApple, FaFacebook } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { signIn } from "next-auth/react";
+import { signupAction } from "@/actions/auth.action";
 
 type Step = "email" | "name" | "password";
-
 const STEPS: Step[] = ["email", "name", "password"];
 
 export default function SignupPage() {
+  const router = useRouter();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");         // ← thêm
 
-  const handlePasswordSubmit = (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+    setError("");
+
+    const result = await signupAction(email, name, password);
+
+    if (result.error) {
+      setError(result.error);
+      setIsLoading(false);
+      return;
+    }
+
+    // Signup thành công → redirect về home
+    router.push("/");
+    router.refresh();
   };
+
+  const handleGoogleSignup = () => {
+    signIn("google", { callbackUrl: "/" });
+  };
+
+  // ... getStrength, strengthLabel, strengthColor giữ nguyên
 
   const getStrength = (pw: string) => {
     let score = 0;
@@ -37,9 +59,7 @@ export default function SignupPage() {
 
   const strength = getStrength(password);
   const strengthLabel = ["", "Yếu", "Trung bình", "Khá", "Mạnh"][strength];
-  const strengthColor = ["", "#ef4444", "#f97316", "#eab308", "#22c55e"][
-    strength
-  ];
+  const strengthColor = ["", "#ef4444", "#f97316", "#eab308", "#22c55e"][strength];
 
   const inputClass =
     "h-11 bg-white border-[#d1d1d1] text-[#0d0d0d] placeholder:text-[#aaa] rounded-xl focus-visible:ring-1 focus-visible:ring-[#0d0d0d] focus-visible:border-[#0d0d0d] text-[14px] transition-all";
@@ -50,15 +70,13 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-[400px]">
-        {/* Card */}
         <div className="bg-white border border-[#e5e5e5] rounded-2xl p-8 shadow-[0_2px_16px_rgba(0,0,0,0.06)]">
-          {/* Logo */}
           <div className="flex flex-col items-center mb-6">
             <h1 className="text-[24px] font-semibold text-[#0d0d0d] tracking-[-0.01em]">
               TẠO TÀI KHOẢN
             </h1>
           </div>
-          {/* Step indicator */}
+
           <div className="flex gap-1.5 mb-6">
             {STEPS.map((s, i) => (
               <div
@@ -74,10 +92,7 @@ export default function SignupPage() {
           {/* Step 1 — Email */}
           {step === "email" && (
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (email) setStep("name");
-              }}
+              onSubmit={(e) => { e.preventDefault(); if (email) setStep("name"); }}
               className="flex flex-col gap-3"
             >
               <div className="flex flex-col gap-1.5">
@@ -101,44 +116,30 @@ export default function SignupPage() {
 
               <div className="flex items-center gap-3 my-2">
                 <Separator className="flex-1 bg-[#e5e5e5]" />
-                <span className="text-[12px] text-[#999] font-medium shrink-0">
-                  HOẶC
-                </span>
+                <span className="text-[12px] text-[#999] font-medium shrink-0">HOẶC</span>
                 <Separator className="flex-1 bg-[#e5e5e5]" />
               </div>
 
               <div className="flex flex-col gap-2.5">
+                {/* ← gắn handler vào đây */}
                 <SocialButton
                   icon={<FcGoogle size={18} />}
                   label="Đăng ký với Google"
+                  onClick={handleGoogleSignup}
                 />
-                {/* <SocialButton
-                  icon={<FaApple size={18} />}
-                  label="Đăng ký với Apple"
-                />
-                <SocialButton
-                  icon={<FaFacebook size={18} color="#1877F2" />}
-                  label="Đăng ký với Facebook"
-                /> */}
               </div>
             </form>
           )}
 
-          {/* Step 2 — Name */}
+          {/* Step 2 — Name — giữ nguyên */}
           {step === "name" && (
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (name.trim()) setStep("password");
-              }}
+              onSubmit={(e) => { e.preventDefault(); if (name.trim()) setStep("password"); }}
               className="flex flex-col gap-3"
             >
               <BackButton onClick={() => setStep("email")} />
-
               <div className="flex flex-col gap-1.5">
-                <label className="text-[14.5px] font-bold text-[#111]">
-                  Họ và tên
-                </label>
+                <label className="text-[14.5px] font-bold text-[#111]">Họ và tên</label>
                 <Input
                   type="text"
                   placeholder="Nguyễn Văn A"
@@ -148,16 +149,9 @@ export default function SignupPage() {
                   autoFocus
                   className={inputClass}
                 />
-                <p className="text-[12px] text-[#999]">
-                  Tên sẽ hiển thị trong tài khoản của bạn.
-                </p>
+                <p className="text-[12px] text-[#999]">Tên sẽ hiển thị trong tài khoản của bạn.</p>
               </div>
-
-              <Button
-                type="submit"
-                disabled={!name.trim()}
-                className={submitClass}
-              >
+              <Button type="submit" disabled={!name.trim()} className={submitClass}>
                 Tiếp tục
               </Button>
             </form>
@@ -165,16 +159,11 @@ export default function SignupPage() {
 
           {/* Step 3 — Password */}
           {step === "password" && (
-            <form
-              onSubmit={handlePasswordSubmit}
-              className="flex flex-col gap-3"
-            >
+            <form onSubmit={handlePasswordSubmit} className="flex flex-col gap-3">
               <BackButton onClick={() => setStep("name")} />
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[14.5px] font-bold text-[#111]">
-                  Mật khẩu
-                </label>
+                <label className="text-[14.5px] font-bold text-[#111]">Mật khẩu</label>
                 <div className="relative">
                   <Input
                     type={showPassword ? "text" : "password"}
@@ -191,11 +180,7 @@ export default function SignupPage() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#555] transition-colors"
                   >
-                    {showPassword ? (
-                      <EyeOff className="w-4 h-4" />
-                    ) : (
-                      <Eye className="w-4 h-4" />
-                    )}
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
 
@@ -206,10 +191,7 @@ export default function SignupPage() {
                         <div
                           key={i}
                           className="h-1 flex-1 rounded-full transition-all duration-300"
-                          style={{
-                            background:
-                              i <= strength ? strengthColor : "#e5e5e5",
-                          }}
+                          style={{ background: i <= strength ? strengthColor : "#e5e5e5" }}
                         />
                       ))}
                     </div>
@@ -220,18 +202,17 @@ export default function SignupPage() {
                 )}
               </div>
 
+              {/* ← Hiển thị lỗi từ server */}
+              {error && (
+                <p className="text-[13px] text-red-500 bg-red-50 border border-red-100 rounded-xl px-4 py-2.5">
+                  {error}
+                </p>
+              )}
+
               <div className="bg-[#f7f7f7] rounded-xl px-4 py-3 flex flex-col gap-0.5 text-[13px] text-[#555]">
-                <span className="text-[#999] text-[11px] font-medium uppercase tracking-wide mb-0.5">
-                  Tóm tắt
-                </span>
-                <span>
-                  <span className="text-[#0d0d0d] font-medium">Email:</span>{" "}
-                  {email}
-                </span>
-                <span>
-                  <span className="text-[#0d0d0d] font-medium">Tên:</span>{" "}
-                  {name}
-                </span>
+                <span className="text-[#999] text-[11px] font-medium uppercase tracking-wide mb-0.5">Tóm tắt</span>
+                <span><span className="text-[#0d0d0d] font-medium">Email:</span> {email}</span>
+                <span><span className="text-[#0d0d0d] font-medium">Tên:</span> {name}</span>
               </div>
 
               <Button
@@ -244,27 +225,14 @@ export default function SignupPage() {
                     <Loader2 className="w-4 h-4 animate-spin" />
                     Đang tạo tài khoản...
                   </span>
-                ) : (
-                  "Tạo tài khoản"
-                )}
+                ) : "Tạo tài khoản"}
               </Button>
 
               <p className="text-[11px] text-[#aaa] text-center leading-relaxed">
                 Đồng ý với{" "}
-                <a
-                  href="#"
-                  className="text-[#555] hover:text-[#0d0d0d] underline transition-colors"
-                >
-                  Điều khoản dịch vụ
-                </a>{" "}
-                và{" "}
-                <a
-                  href="#"
-                  className="text-[#555] hover:text-[#0d0d0d] underline transition-colors"
-                >
-                  Chính sách bảo mật
-                </a>
-                .
+                <a href="#" className="text-[#555] hover:text-[#0d0d0d] underline transition-colors">Điều khoản dịch vụ</a>
+                {" "}và{" "}
+                <a href="#" className="text-[#555] hover:text-[#0d0d0d] underline transition-colors">Chính sách bảo mật</a>.
               </p>
             </form>
           )}
@@ -272,12 +240,7 @@ export default function SignupPage() {
 
         <p className="text-center text-[15px] text-[#999] mt-4">
           Đã có tài khoản?{" "}
-          <a
-            href="/login"
-            className="text-[#0d0d0d] hover:underline font-bold transition-colors"
-          >
-            Đăng nhập
-          </a>
+          <a href="/login" className="text-[#0d0d0d] hover:underline font-bold transition-colors">Đăng nhập</a>
         </p>
       </div>
     </div>
@@ -297,16 +260,16 @@ function BackButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-function SocialButton({
-  icon,
-  label,
-}: {
+// ← Thêm onClick prop
+function SocialButton({ icon, label, onClick }: {
   icon: React.ReactNode;
   label: string;
+  onClick?: () => void;
 }) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className="flex items-center justify-center gap-3 h-11 w-full rounded-xl border border-[#d1d1d1] bg-white hover:bg-[#f7f7f7] text-[14px] font-medium text-[#0d0d0d] transition-all hover:border-[#bbb] active:scale-[0.99]"
     >
       {icon}

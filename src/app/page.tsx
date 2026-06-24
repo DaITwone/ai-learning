@@ -48,7 +48,7 @@ export default function Home() {
             className="h-12 px-6 rounded-xl text-base font-semibold border-2 hover:bg-muted hover:-translate-y-1 transition-all duration-300"
             asChild
           >
-            <Link href="/register">Đăng ký</Link>
+            <Link href="/signup">Đăng ký</Link>
           </Button>
         </div>
       </div>
