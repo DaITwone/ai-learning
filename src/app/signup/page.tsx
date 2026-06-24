@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
-import { FaApple, FaFacebook } from "react-icons/fa";
+// import { FaApple, FaFacebook } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -112,14 +112,14 @@ export default function SignupPage() {
                   icon={<FcGoogle size={18} />}
                   label="Đăng ký với Google"
                 />
-                <SocialButton
+                {/* <SocialButton
                   icon={<FaApple size={18} />}
                   label="Đăng ký với Apple"
                 />
                 <SocialButton
                   icon={<FaFacebook size={18} color="#1877F2" />}
                   label="Đăng ký với Facebook"
-                />
+                /> */}
               </div>
             </form>
           )}

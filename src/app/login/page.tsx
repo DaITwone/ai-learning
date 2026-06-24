@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { FaApple, FaFacebook } from "react-icons/fa";
+// import { FaApple, FaFacebook } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 
 export default function LoginPage() {
@@ -94,7 +94,7 @@ export default function LoginPage() {
               label="Tiếp tục với Google"
             />
 
-            <SocialButton
+            {/* <SocialButton
               icon={<FaApple className="w-5 h-5" />}
               label="Tiếp tục với Apple"
             />
@@ -102,7 +102,7 @@ export default function LoginPage() {
             <SocialButton
               icon={<FaFacebook className="w-5 h-5 text-blue-600" />}
               label="Tiếp tục với Facebook"
-            />
+            /> */}
           </div>
         </div>
 
