@@ -21,7 +21,7 @@ export default function Home() {
           className=""
         />
 
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-purple-950/95 drop-shadow-sm">
+        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl text-purple-950/85 drop-shadow-sm">
           Your All-in-One Platform for Learning, Practice, and Discovery{" "}
         </h1>
 
